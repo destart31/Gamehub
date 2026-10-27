@@ -1,0 +1,107 @@
+{
+  "_comentario": "Opcional. Preencha basePath com a pasta base dos seus emuladores (layout do RetroBat/Playbox: subpastas roms e emulators). Enquanto basePath estiver vazio, a seção de emuladores fica desligada. Edite este arquivo e reinicie o app; não precisa recompilar.",
+  "basePath": "",
+  "systems": [
+    {
+      "folder": "n64",
+      "displayName": "Nintendo 64",
+      "extensions": [".n64", ".z64", ".v64", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\mupen64plus_next_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "ps2",
+      "displayName": "PlayStation 2",
+      "extensions": [".iso", ".chd", ".bin"],
+      "emulatorPath": "emulators\\pcsx2\\pcsx2-qt.exe",
+      "argsTemplate": "\"{rom}\""
+    },
+    {
+      "_verificar": "Confirme o caminho do Dolphin dentro de emulators\\dolphin.",
+      "folder": "gamecube",
+      "displayName": "GameCube",
+      "extensions": [".iso", ".rvz", ".gcm", ".ciso"],
+      "emulatorPath": "emulators\\dolphin\\Dolphin.exe",
+      "argsTemplate": "-b -e \"{rom}\""
+    },
+    {
+      "folder": "cps1",
+      "displayName": "Arcade (CPS1)",
+      "extensions": [".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\fbneo_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "snes",
+      "displayName": "Super Nintendo",
+      "extensions": [".smc", ".sfc", ".fig", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\snes9x_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "megadrive",
+      "displayName": "Mega Drive / Genesis",
+      "extensions": [".md", ".bin", ".gen", ".smd", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\genesis_plus_gx_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "nes",
+      "displayName": "Nintendo (NES)",
+      "extensions": [".nes", ".fds", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\fceumm_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "gba",
+      "displayName": "Game Boy Advance",
+      "extensions": [".gba", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\mgba_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "psx",
+      "displayName": "PlayStation",
+      "extensions": [".iso", ".bin", ".cue", ".chd", ".pbp", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\pcsx_rearmed_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "psp",
+      "displayName": "PSP",
+      "extensions": [".iso", ".cso", ".pbp"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\ppsspp_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "nds",
+      "displayName": "Nintendo DS",
+      "extensions": [".nds", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\melonds_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "dreamcast",
+      "displayName": "Dreamcast",
+      "extensions": [".cdi", ".gdi", ".chd"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\flycast_libretro.dll\" \"{rom}\""
+    },
+    {
+      "_verificar": "Confirme o nome da pasta e do executável do emulador de Switch (Ryujinx, Yuzu e derivados usam nomes diferentes).",
+      "folder": "switch",
+      "displayName": "Nintendo Switch",
+      "extensions": [".nsp", ".xci"],
+      "emulatorPath": "emulators\\ryujinx\\Ryujinx.exe",
+      "argsTemplate": "\"{rom}\""
+    },
+    {
+      "_verificar": "Confirme o caminho do rpcs3.exe. O RPCS3 aceita ISO direto, sem montar nem descriptografar antes.",
+      "folder": "ps3",
+      "displayName": "PlayStation 3",
+      "extensions": [".iso"],
+      "emulatorPath": "emulators\\rpcs3\\rpcs3.exe",
+      "argsTemplate": "--no-gui \"{rom}\""
+    }
+  ]
+}

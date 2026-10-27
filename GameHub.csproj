@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>GameHub</AssemblyName>
+    <RootNamespace>GameHub</RootNamespace>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+  </ItemGroup>
+
+  <!-- Logos das plataformas + icone da janela embutidos no .exe -->
+  <ItemGroup>
+    <Resource Include="Assets\Icons\*.png" />
+    <!-- app.ico precisa ser Resource alem de ApplicationIcon, senao o XAML
+         nao consegue carrega-lo em runtime como icone da janela (sao dois usos diferentes) -->
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
+
+  <!-- emulators.json fica como arquivo solto (editável sem recompilar) ao lado do .exe -->
+  <ItemGroup>
+    <None Update="emulators.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Só entra em ação quando você publicar com -p:PublishSingleFile=true
+       (dotnet publish normal / F5 / build do dia a dia não é afetado). -->
+  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+</Project>

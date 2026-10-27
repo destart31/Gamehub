@@ -1,0 +1,34 @@
+# Compilação
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+*.log
+
+# Visual Studio / VS Code / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.DotSettings.user
+launchSettings.json
+
+# Claude Code (arquivos locais da ferramenta)
+CLAUDE.md
+.claude/
+
+# Pacotes e temporários
+*.nupkg
+*.tmp
+*.bak
+*.bak-*
+*.bak.*
+Thumbs.db
+.DS_Store
+
+# Saída do dotnet publish
+GameHubApp/
+*.zip
