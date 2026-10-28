@@ -6,6 +6,28 @@ Launcher pessoal que reúne os jogos de várias lojas e emuladores em uma única
 >
 > **Não é afiliado à Valve/Steam, Epic Games, GOG/CD Projekt, Electronic Arts, Ubisoft nem a nenhum emulador.** Os nomes e logos das lojas pertencem aos seus donos e aparecem só para identificar cada loja. Veja [Limitações e avisos](#limitações-e-avisos) antes de usar.
 
+## Telas
+
+> Ilustrações esquemáticas do layout, com jogos fictícios. Não são capturas da minha biblioteca: o repositório não contém arte de jogos de terceiros.
+
+### Início
+
+| Mouse e teclado | Controle |
+|---|---|
+| ![Início com mouse](docs/img/inicio.svg) | ![Início com controle](docs/img/inicio-controle.svg) |
+
+### Detalhes do jogo
+
+| Mouse e teclado | Controle |
+|---|---|
+| ![Detalhes com mouse](docs/img/detalhes.svg) | ![Detalhes com controle](docs/img/detalhes-controle.svg) |
+
+No modo controle somem os itens que exigem mouse ou teclado (adicionar jogo/ROM, lixeiras, links), os botões ganham o ícone do controle e o detalhe inteiro é navegável pelo direcional.
+
+### Teclado virtual (modo controle)
+
+![Teclado virtual](docs/img/teclado-virtual.svg)
+
 ## O que ele faz
 
 - **Biblioteca unificada**: Steam, Epic Games, GOG, EA App e Ubisoft Connect na mesma lista. O mesmo jogo em mais de uma loja vira um único card (na Steam, a junção é pelo AppId, então renomeações da loja não duplicam o jogo).
