@@ -37,6 +37,7 @@ public class EmulatorScanner
     {
         public string DisplayName { get; set; } = "";
         public string RomFolder { get; set; } = "";
+        public string EmulatorFolder { get; set; } = "";
     }
 
     /// <summary>Lista todo sistema que está no emulators.json, tenha ROM ou não - usado
@@ -52,7 +53,8 @@ public class EmulatorScanner
             result.Add(new SystemInfo
             {
                 DisplayName = system.DisplayName,
-                RomFolder = Path.Combine(config.BasePath, "roms", system.Folder)
+                RomFolder = Path.Combine(config.BasePath, "roms", system.Folder),
+                EmulatorFolder = Path.GetDirectoryName(Path.Combine(config.BasePath, system.EmulatorPath)) ?? config.BasePath
             });
         }
         return result;

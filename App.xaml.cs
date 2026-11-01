@@ -28,6 +28,33 @@ public partial class App : Application
         };
     }
 
+    // Só um GameHub por vez: com o programa na bandeja, abrir o .exe de novo apenas traz a janela de volta
+    private static Mutex? _singleInstance;
+    private static EventWaitHandle? _showSignal;
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        _singleInstance = new Mutex(true, @"Local\GameHub.SingleInstance", out bool firstInstance);
+        _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\GameHub.ShowWindow");
+
+        if (!firstInstance)
+        {
+            try { _showSignal.Set(); } catch { /* o outro GameHub já estava fechando */ }
+            Shutdown(0);
+            return;
+        }
+
+        base.OnStartup(e);
+
+        var listener = new Thread(() =>
+        {
+            while (_showSignal.WaitOne())
+                Dispatcher.BeginInvoke(new Action(() => (Current.MainWindow as GameHub.MainWindow)?.ShowFromTray()));
+        })
+        { IsBackground = true, Name = "GameHub.ShowSignal" };
+        listener.Start();
+    }
+
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Logger.LogError("Erro na interface", e.Exception);

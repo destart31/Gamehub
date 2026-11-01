@@ -4,12 +4,20 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms> <!-- só para o ícone da bandeja (NotifyIcon) -->
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>GameHub</AssemblyName>
     <RootNamespace>GameHub</RootNamespace>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <!-- Com Windows Forms ligado, o .NET importaria esses namespaces em todo arquivo e geraria
+       conflito com os tipos do WPF (Button, MessageBox, Application...). Tira os dois. -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />

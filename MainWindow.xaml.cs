@@ -513,7 +513,7 @@ public partial class MainWindow : Window
  
     private void CollectionPicker_BgClick(object sender, MouseButtonEventArgs e) => CloseCollectionPicker();
 
-        private Button? _emuBack, _emuAdd, _emuRefresh;
+        private Button? _emuBack, _emuAdd, _emuRefresh, _emuFolder;
  
     /// <summary>
     /// Conteúdo de um botão: no mouse, o texto de sempre; no controle, o botão do controle + o texto.
@@ -522,8 +522,7 @@ public partial class MainWindow : Window
     {
         if (!_controllerMode) return mouseText;
  
-        var glyph = BuildHintGlyph(key);
-        glyph.LayoutTransform = new ScaleTransform(0.8, 0.8); // um pouco menor para não engordar o botão
+        var glyph = BuildHintGlyph(key, 22);   // menor que o da barra de dicas, já desenhado nesse tamanho (com escala a letra desalinhava)
         glyph.VerticalAlignment = VerticalAlignment.Center;
  
         var sp = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
@@ -544,6 +543,7 @@ public partial class MainWindow : Window
         if (_emuBack != null) _emuBack.Content = PadContent("B", "←  Voltar aos consoles", "Voltar aos consoles");
         if (_emuAdd != null) _emuAdd.Visibility = _controllerMode ? Visibility.Collapsed : Visibility.Visible;
         if (_emuRefresh != null) _emuRefresh.Visibility = _controllerMode ? Visibility.Collapsed : Visibility.Visible;
+        if (_emuFolder != null) _emuFolder.Visibility = _controllerMode ? Visibility.Collapsed : Visibility.Visible;
  
         // Painel de detalhes
         DetailPlayButton.Content = PadContent("START", "▶  JOGAR AGORA", "JOGAR AGORA");
@@ -583,7 +583,8 @@ public partial class MainWindow : Window
         MaximizeButton.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE922";
 
         WindowStateService.Restore(this);
-        Closing += (_, _) => WindowStateService.Save(this);
+        Closing += OnMainWindowClosing;
+        InitTray();
 
         Deactivated += (_, _) =>
         {
@@ -2659,6 +2660,29 @@ public partial class MainWindow : Window
         toolbar.Children.Add(addButton);
         _emuAdd = addButton;
 
+        var emulatorFolder = system.EmulatorFolder;
+
+        var folderButton = MakePill("📁  Pasta do emulador");
+        folderButton.Click += (_, _) =>
+        {
+            // Abre a pasta do emulador no Explorer (configurações, atalhos, saves...)
+            try
+            {
+                if (!Directory.Exists(emulatorFolder))
+                {
+                    MessageBox.Show($"Não encontrei a pasta do emulador:\n{emulatorFolder}", "GameHub");
+                    return;
+                }
+                Process.Start("explorer.exe", $"\"{emulatorFolder}\"");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Não consegui abrir a pasta: {ex.Message}");
+            }
+        };
+        toolbar.Children.Add(folderButton);
+        _emuFolder = folderButton;
+
         var refreshButton = MakePill("↻  Atualizar");
         refreshButton.Click += async (_, _) => await LoadGamesAsync();
         toolbar.Children.Add(refreshButton);
@@ -3655,8 +3679,11 @@ public partial class MainWindow : Window
         ControllerHintBar.Visibility = hints.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    /// <summary>Desenha o botão como no controle: A/B/X/Y redondos e coloridos, os outros em cápsula cinza.</summary>
-    private static FrameworkElement BuildHintGlyph(string key)
+    /// <summary>
+    /// Desenha o botão como no controle: A/B/X/Y redondos e coloridos, os outros em cápsula cinza.
+    /// <paramref name="size"/> é a altura do botão: 26 na barra de dicas, 22 dentro dos botões.
+    /// </summary>
+    private static FrameworkElement BuildHintGlyph(string key, double size = 26)
     {
         Color? face = key switch
         {
@@ -3671,35 +3698,40 @@ public partial class MainWindow : Window
         {
             return new Border
             {
-                Width = 26,
-                Height = 26,
-                CornerRadius = new CornerRadius(13),
+                Width = size,
+                Height = size,
+                CornerRadius = new CornerRadius(size / 2),
                 Background = new SolidColorBrush(face.Value),
+                SnapsToDevicePixels = true,
                 Child = new TextBlock
                 {
                     Text = key,
-                    FontSize = 13,
+                    FontSize = Math.Round(size / 2),
                     FontWeight = FontWeights.Bold,
                     Foreground = key == "Y" ? Brushes.Black : Brushes.White,
+                    TextAlignment = TextAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    // a letra maiúscula fica ~1 px abaixo do centro no círculo pequeno (22 px); o de 26 px já está certo
+                    Margin = size < 26 ? new Thickness(0, 0, 0, 2) : new Thickness(0)
                 }
             };
         }
 
         return new Border
         {
-            Height = 26,
-            MinWidth = 26,
-            Padding = new Thickness(9, 0, 9, 0),
-            CornerRadius = new CornerRadius(8),
+            Height = size,
+            MinWidth = size,
+            Padding = new Thickness(Math.Round(size * 0.35), 0, Math.Round(size * 0.35), 0),
+            CornerRadius = new CornerRadius(Math.Round(size * 0.31)),
             Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2D, 0x3F)),
             BorderBrush = new SolidColorBrush(Color.FromRgb(0x3F, 0x44, 0x5C)),
             BorderThickness = new Thickness(1),
+            SnapsToDevicePixels = true,
             Child = new TextBlock
             {
                 Text = key,
-                FontSize = 11,
+                FontSize = Math.Max(9, Math.Round(size * 0.42)),
                 FontWeight = FontWeights.Bold,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB)),
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -4339,36 +4371,6 @@ public partial class MainWindow : Window
         ToggleFullscreen();
     }
 
-    private bool _fullscreen;
-    private WindowState _stateBeforeFullscreen = WindowState.Normal;
-
-    private void ToggleFullscreen()
-    {
-        var titleRow = ((Grid)TitleBar.Parent).RowDefinitions[0];
-        var chrome = System.Windows.Shell.WindowChrome.GetWindowChrome(this);
-
-        if (!_fullscreen)
-        {
-            _fullscreen = true;
-            _stateBeforeFullscreen = WindowState;
-            TitleBar.Visibility = Visibility.Collapsed;
-            titleRow.Height = new GridLength(0);
-            if (chrome != null) chrome.CaptionHeight = 0;   // sem área invisível de arrastar no topo
-            WindowStyle = WindowStyle.None;
-            WindowState = WindowState.Normal;                // força remaximizar cobrindo a tela toda
-            WindowState = WindowState.Maximized;
-        }
-        else
-        {
-            _fullscreen = false;
-            TitleBar.Visibility = Visibility.Visible;
-            titleRow.Height = new GridLength(35);
-            if (chrome != null) chrome.CaptionHeight = 35;
-            WindowStyle = WindowStyle.SingleBorderWindow;
-            WindowState = _stateBeforeFullscreen;            // volta como estava (normal ou maximizada)
-        }
-    }
-
     private void DeleteRomButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: GameEntry game }) return;
@@ -4428,14 +4430,15 @@ public partial class MainWindow : Window
             try
             {
                 var hwnd = GetForegroundWindow();
-                if (hwnd == IntPtr.Zero) return;
+                if (hwnd == IntPtr.Zero) { ResetForegroundTracking(); return; }
                 GetWindowThreadProcessId(hwnd, out var pid);
-                if (pid == 0 || pid == (uint)Environment.ProcessId) return;
+                if (pid == 0 || pid == (uint)Environment.ProcessId) { ResetForegroundTracking(); return; }
 
-                using var proc = Process.GetProcessById((int)pid);
-                if (LauncherUiProcesses.Contains(proc.ProcessName)) return;
+                // Só sai de cena quando a janela da frente é mesmo o jogo (regras em MainWindow.JanelaBandeja.cs)
+                if (!ForegroundIsGame((int)pid)) return;
 
                 HideLaunchOverlay();
+                MinimizeForGame((int)pid);
             }
             catch { /* processo fechou entre a leitura e o acesso: tenta de novo no próximo tick */ }
         }
@@ -4447,6 +4450,8 @@ public partial class MainWindow : Window
             try
             {
                 _launching = true;
+                _launchingGame = game;
+                ResetForegroundTracking();
                 _launchSawDeactivate = false;
                 _launchStartedAt = DateTime.Now;
                 ShowLaunchOverlay(game);
