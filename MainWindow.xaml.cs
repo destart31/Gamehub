@@ -2041,7 +2041,7 @@ public partial class MainWindow : Window
         stack.Children.Add(new TextBlock
         {
             Text = "O GameHub não instala emuladores: ele usa os que você já tem (por exemplo, uma instalação do RetroBat ou do Playbox). " +
-                   "Para ativar esta tela, crie um arquivo chamado emulators.json na mesma pasta do GameHub.exe, " +
+                   "Para ativar esta tela, edite (ou crie) o arquivo emulators.json na mesma pasta do GameHub.exe, " +
                    "apontando para a pasta dos seus emuladores e listando os consoles. Depois é só reabrir o GameHub.",
             FontSize = 14,
             TextWrapping = TextWrapping.Wrap,

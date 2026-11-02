@@ -43,7 +43,7 @@ No modo controle somem os itens que exigem mouse ou teclado (adicionar jogo/ROM,
 - **Duplicados**: em Ajustes > Duplicados, o app sugere pares de jogos de lojas diferentes com nomes parecidos para você juntar em um card só, ou marcar como diferentes.
 - **Arte nos cards de consoles e atalhos**: cada card mostra a arte de um jogo, sorteado a cada abertura, ou um jogo que você fixa (botão "Usar como arte do card" no painel de detalhes ou menu do botão direito no card).
 - **Instalados e adquiridos**: telas separadas. Instalados mostra só jogos de loja instalados; Adquiridos mostra o que você possui e não instalou (a partir do banco do GOG Galaxy e da conta).
-- **Emuladores**: jogos agrupados por console, configurados por `emulators.json`. Escolher um console no topo filtra a Início; "Ver todos" abre a grade daquele console.
+- **Emuladores**: jogos agrupados por console, configurados por `emulators.json` (veja [Configurar emuladores](#configurar-emuladores)). Escolher um console no topo filtra a Início; "Ver todos" abre a grade daquele console. Na tela de cada console, os botões **Adicionar ROM**, **Pasta do emulador** (abre a pasta do emulador, para ajustar as configurações dele) e **Atualizar**. Sem `emulators.json` configurado, a tela explica o que fazer em vez de ficar vazia.
 - **Jogos modificados**: tela para jogos adicionados manualmente (executável, capa e argumentos próprios).
 - **Favoritos e ocultos**, e ordenação por nome, último jogado ou mais jogado.
 - **Tempo de jogo e última sessão** por loja, sem somar entre plataformas (contas diferentes não compartilham save).
@@ -53,6 +53,9 @@ No modo controle somem os itens que exigem mouse ou teclado (adicionar jogo/ROM,
 - **Atualização automática**: a biblioteca é refeita em segundo plano ao voltar para a janela.
 - **Avisos dentro do programa** (por exemplo, ao terminar de buscar fundos), barra de rolagem, tooltips e menus escuros no estilo do app. Transições curtas ao trocar de tela e sons na Início.
 - **Janela lembrada**: tamanho, posição e estado maximizado voltam como você deixou (com proteção para nunca abrir fora da tela).
+- **Tela cheia de verdade (`F11`)**: ocupa o monitor inteiro e cobre a barra de tarefas, só enquanto o GameHub está em primeiro plano. Fora da tela cheia, a janela maximizada respeita a barra de tarefas e nada fica escondido atrás dela.
+- **Bandeja do sistema**: fechar a janela (X) manda o GameHub para a bandeja em vez de encerrar. Clique no ícone para abrir; no menu do ícone, **Sair** encerra de verdade. Desligar ou sair do Windows não é bloqueado. Abrir o programa de novo só traz a janela que já está aberta (instância única).
+- **Sai da frente quando o jogo abre**: ao abrir um jogo, o GameHub minimiza assim que a janela do jogo toma a tela e volta sozinho quando o jogo fecha. Ele distingue o jogo de launchers (Steam, Epic, GOG, EA, Ubisoft, Rockstar), instaladores de componentes e janelas do Windows: o jogo é reconhecido pela pasta de onde o executável roda, e janelas sem identificação clara só contam depois de 6 segundos na frente.
 
 ## Planos de fundo
 
@@ -77,6 +80,36 @@ New-Item -ItemType Directory -Force "$env:APPDATA\GameHub" | Out-Null
 
 Sem a chave, tudo funciona normalmente; só não há fundos baixados do SteamGridDB.
 
+## Configurar emuladores
+
+O GameHub não instala nem inclui emuladores: ele usa os que você já tem. As ROMs e os emuladores são lidos a partir de um arquivo `emulators.json`, que fica na mesma pasta do `GameHub.exe` (e do projeto, ao rodar com `dotnet run`). Não precisa recompilar: edite o arquivo e reabra o GameHub. O repositório traz o modelo [`emulators.example.json`](emulators.example.json) para copiar e ajustar.
+
+```json
+{
+  "basePath": "D:\\Emuladores",
+  "systems": [
+    {
+      "folder": "ps2",
+      "displayName": "PlayStation 2",
+      "extensions": [".iso", ".chd", ".bin"],
+      "emulatorPath": "emulators\\pcsx2\\pcsx2-qt.exe",
+      "argsTemplate": "\"{rom}\""
+    }
+  ]
+}
+```
+
+| Campo | Para que serve |
+|---|---|
+| `basePath` | Pasta base da sua instalação de emuladores (layout do RetroBat/Playbox) |
+| `folder` | Subpasta das ROMs do console: `<basePath>\roms\<folder>` |
+| `displayName` | Nome do console na tela |
+| `extensions` | Extensões de arquivo que contam como jogo |
+| `emulatorPath` | Executável do emulador, relativo ao `basePath` |
+| `argsTemplate` | Argumentos do emulador. `{rom}` vira o caminho da ROM e `{base}` vira o `basePath` |
+
+Um console cuja pasta de ROMs ou cujo emulador não existe é simplesmente pulado, sem afetar os outros. Sem `basePath` preenchido, a tela Emuladores mostra um aviso com atalhos para a pasta do GameHub e para esta seção.
+
 ## Controles
 
 | Controle | Ação |
@@ -91,7 +124,7 @@ Sem a chave, tudo funciona normalmente; só não há fundos baixados do SteamGri
 
 **Teclado virtual**: A na lupa do topo abre o teclado. D-pad escolhe a tecla e A digita; X apaga, Y põe um espaço, Start (ou a tecla OK) conclui e B fecha. A lista filtra enquanto você digita. O mesmo teclado serve para dar nome a uma coleção nova (no seletor de coleções do detalhe): a primeira letra de cada palavra sai maiúscula e Start ou OK confirma.
 
-Teclado e mouse: digitar em qualquer lugar abre a busca, `F11` alterna tela cheia, `Esc` fecha a camada de lançamento, `Ctrl+M` liga/desliga os sons. Com o mouse, a Início tem setas para rolar a fileira e o botão grande "Jogar"; no controle esse botão some, porque o Start joga.
+Teclado e mouse: digitar em qualquer lugar abre a busca, `F11` alterna a tela cheia (cobrindo a barra de tarefas), `Esc` fecha a camada de lançamento, `Ctrl+M` liga/desliga os sons. Com o mouse, a Início tem setas para rolar a fileira e o botão grande "Jogar"; no controle esse botão some, porque o Start joga.
 
 ## Como cada loja é lida
 
@@ -130,7 +163,7 @@ Se o build acusar arquivos `obj` ausentes, apague as pastas `bin` e `obj` e comp
 dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish
 ```
 
-Gera um `GameHub.exe` que depende do runtime .NET 10 Desktop instalado. Arquivos de conteúdo, como `emulators.json`, ficam ao lado do executável; os dados do usuário continuam em `%AppData%\GameHub`. O resultado fica na pasta `publish` (já ignorada pelo git). Publique fora de pastas sincronizadas.
+Gera um `GameHub.exe` que depende do runtime .NET 10 Desktop instalado. Para atualizar um executável já em uso, encerre o GameHub pelo menu **Sair** do ícone da bandeja antes de publicar (o X só esconde a janela). Arquivos de conteúdo, como `emulators.json`, ficam ao lado do executável; os dados do usuário continuam em `%AppData%\GameHub`. O resultado fica na pasta `publish` (já ignorada pelo git). Publique fora de pastas sincronizadas.
 
 ## Estrutura do projeto
 
@@ -141,7 +174,9 @@ GameHub/
 ├─ Services/      Lógica de biblioteca, capas, fundos, controle, dados do usuário
 ├─ Assets/        Ícones das lojas
 ├─ MainWindow.xaml(.cs)   Janela principal: topo, Início, listas, detalhes, barra de dicas, camada de lançamento
+├─ MainWindow.JanelaBandeja.cs  Tela cheia, bandeja do sistema e minimizar quando o jogo abre
 ├─ emulators.json         Consoles e emuladores configurados
+├─ emulators.example.json Modelo de configuração dos emuladores
 └─ App.xaml(.cs)          Inicialização e tratamento global de erros
 ```
 
@@ -156,6 +191,7 @@ Principais serviços:
 - `GameDetailsService`: capturas, requisitos, idiomas e site oficial da loja pública da Steam, com cache em disco (30 dias; 14 quando o jogo não foi achado).
 - `TitleAliasService`: equivalências de nomes entre lojas, usadas para agrupar o mesmo jogo e para sugerir duplicados.
 - `WindowStateService`: salva e restaura tamanho, posição e estado da janela.
+- `TrayService`: ícone na bandeja do sistema (abrir e sair).
 - `SteamLocalStatsService`: horas e última sessão da Steam.
 - `PlaySessionService`: mede o tempo de emuladores e jogos modificados.
 - `UserDataService` e `UiStateService`: favoritos, ocultos, último lançamento, aba e ordenação.
@@ -205,7 +241,7 @@ Este é um projeto pessoal; funciona bem no PC em que foi feito, mas **não foi 
 - **Só Windows** (WPF, .NET 10), desenvolvido e testado em um único PC. Os ícones da interface usam a fonte Segoe Fluent Icons, que no Windows 10 pode não existir.
 - **Depende do GOG Galaxy** para os jogos "adquiridos" e para o tempo de jogo da Epic, EA App e Ubisoft: o GameHub lê o banco local do Galaxy (`galaxy-2.0.db`), que é interno, não documentado e pode mudar sem aviso. Sem o Galaxy (ou sem as integrações ativas nele), os jogos instalados continuam aparecendo, mas a lista de adquiridos e as horas de Epic, EA e Ubisoft podem faltar.
 - **Rotas não oficiais da loja da Steam**: capturas, requisitos, descrição e busca por nome usam endereços públicos da loja (`appdetails`, `storesearch`) que não são documentados e podem parar de funcionar. Quando falham, a tela só deixa de mostrar esses dados.
-- **Emuladores**: a configuração (`emulators.json`) espera uma pasta base no layout do RetroBat/Playbox (`roms\<console>` e `emulators\<emulador>`) e começa vazia, com os emuladores desligados. O GameHub não inclui emuladores, ROMs nem jogos.
+- **Emuladores**: a configuração (`emulators.json`) espera uma pasta base no layout do RetroBat/Playbox (`roms\<console>` e `emulators\<emulador>`) e começa vazia, com os emuladores desligados até você configurar (veja [Configurar emuladores](#configurar-emuladores)). O GameHub não inclui emuladores, ROMs nem jogos.
 - **Idioma**: a interface está só em português do Brasil.
 - **Sem instalador**: não há instalador, atualização automática nem assinatura digital; o Windows pode mostrar um aviso ao abrir um executável gerado por você.
 - **Arte de jogos**: capas e fundos são baixados na sua máquina, a partir das lojas, do SteamGridDB e de repositórios públicos, e ficam só em cache local. Nada disso vem no repositório.
@@ -226,6 +262,7 @@ Os links "PCGamingWiki" e "HowLongToBeat" só abrem o navegador. Os arquivos de 
 
 ### Outras limitações conhecidas
 
+- O GameHub minimiza ao abrir um jogo reconhecendo o executável pela pasta de instalação. Um jogo que roda de outra pasta, ou um launcher não listado, só é considerado depois de 6 segundos na frente; em casos raros ele pode minimizar tarde, ou nem minimizar. Fechar o GameHub pelo X não encerra o programa (vai para a bandeja): use **Sair** no ícone.
 - O nível de bateria do controle só aparece quando o Windows o informa: receptores 2.4G como o do 8BitDo Ultimate 2C se apresentam como "com fio", e aí o app mostra apenas "conectado".
 - Epic, EA App e Ubisoft não guardam o tempo localmente: o GameHub depende do GOG Galaxy e do plugin de cada loja. Sem a integração ativa no Galaxy, os jogos novos dessa loja podem faltar ou ficar sem horas.
 - Renomear ou excluir uma coleção só é possível com o mouse (botão direito no chip); criar e marcar jogos funciona também pelo controle.
