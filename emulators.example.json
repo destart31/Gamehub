@@ -1,0 +1,19 @@
+{
+  "basePath": "D:\\Emuladores",
+  "systems": [
+    {
+      "folder": "n64",
+      "displayName": "Nintendo 64",
+      "extensions": [".n64", ".z64", ".v64", ".zip"],
+      "emulatorPath": "emulators\\retroarch\\retroarch.exe",
+      "argsTemplate": "-L \"{base}\\emulators\\retroarch\\cores\\mupen64plus_next_libretro.dll\" \"{rom}\""
+    },
+    {
+      "folder": "ps2",
+      "displayName": "PlayStation 2",
+      "extensions": [".iso", ".chd", ".bin"],
+      "emulatorPath": "emulators\\pcsx2\\pcsx2-qt.exe",
+      "argsTemplate": "\"{rom}\""
+    }
+  ]
+}

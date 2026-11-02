@@ -1830,6 +1830,12 @@ public partial class MainWindow : Window
 
     private void BuildEmulatorConsolePicker(List<EmulatorScanner.SystemInfo> systems, Dictionary<string, List<GameEntry>> gameGroups)
     {
+        if (systems.Count == 0)
+        {
+            BuildEmulatorEmptyState();
+            return;
+        }
+
         var stack = new StackPanel();
         stack.Children.Add(new TextBlock
         {
@@ -2012,6 +2018,64 @@ public partial class MainWindow : Window
             Background = new SolidColorBrush(Color.FromArgb(0xC8, 0x11, 0x13, 0x1C)),
             CornerRadius = new CornerRadius(12),
             Padding = new Thickness(18),
+            Child = stack
+        });
+    }
+
+    /// <summary>
+    /// Nenhum console configurado (sem emulators.json ao lado do .exe): em vez de uma tela vazia,
+    /// explica o que fazer e oferece atalhos.
+    /// </summary>
+    private void BuildEmulatorEmptyState()
+    {
+        var stack = new StackPanel { MaxWidth = 640, HorizontalAlignment = HorizontalAlignment.Left };
+
+        stack.Children.Add(new TextBlock
+        {
+            Text = "NENHUM EMULADOR CONFIGURADO",
+            FontSize = 16,
+            FontWeight = FontWeights.Bold,
+            Foreground = HomeAccent,
+            Margin = new Thickness(0, 0, 0, 12)
+        });
+        stack.Children.Add(new TextBlock
+        {
+            Text = "O GameHub não instala emuladores: ele usa os que você já tem (por exemplo, uma instalação do RetroBat ou do Playbox). " +
+                   "Para ativar esta tela, crie um arquivo chamado emulators.json na mesma pasta do GameHub.exe, " +
+                   "apontando para a pasta dos seus emuladores e listando os consoles. Depois é só reabrir o GameHub.",
+            FontSize = 14,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = new SolidColorBrush(Color.FromRgb(0xB6, 0xBC, 0xC8)),
+            Margin = new Thickness(0, 0, 0, 18)
+        });
+
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal };
+
+        var folderButton = MakePill("📁  Abrir a pasta do GameHub");
+        void OpenAppFolder()
+        {
+            try { Process.Start("explorer.exe", $"\"{AppContext.BaseDirectory.TrimEnd('\\')}\""); }
+            catch (Exception ex) { MessageBox.Show($"Não consegui abrir a pasta: {ex.Message}"); }
+        }
+        folderButton.Click += (_, _) => OpenAppFolder();
+        buttons.Children.Add(folderButton);
+
+        var readmeButton = MakePill("📖  Ver exemplo no README");
+        void OpenReadme() => OpenUrl("https://github.com/destart31/GameHub#readme");
+        readmeButton.Click += (_, _) => OpenReadme();
+        buttons.Children.Add(readmeButton);
+
+        stack.Children.Add(buttons);
+
+        // Controle: os dois botões entram na navegação
+        _navTargets.Add(new NavTarget { Element = () => folderButton, Activate = OpenAppFolder });
+        _navTargets.Add(new NavTarget { Element = () => readmeButton, Activate = OpenReadme });
+
+        EmulatorSection.Children.Add(new Border
+        {
+            Background = new SolidColorBrush(Color.FromArgb(0xC8, 0x11, 0x13, 0x1C)),
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(24),
             Child = stack
         });
     }
