@@ -10,7 +10,9 @@ namespace GameHub.Services;
 
 public class CoverService
 {
-    private static readonly HttpClient HttpClient = new();
+    // O timeout só pode ser definido antes da primeira requisição (por isso aqui, e não a cada atualização da biblioteca).
+    // 8 s por capa: antes ficava esperando servidores lentos e travava a fila toda.
+    private static readonly HttpClient HttpClient = new() { Timeout = TimeSpan.FromSeconds(8) };
     private static readonly string CoversDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GameHub", "Covers");
     private static readonly string ThumbsDir = Path.Combine(CoversDir, "thumbs");
@@ -216,7 +218,6 @@ public class CoverService
 
         // 12 downloads em paralelo com timeout de 8s por capa -
         // antes ficava esperando servidores lentos e travava a fila toda.
-        HttpClient.Timeout = TimeSpan.FromSeconds(8);
         await Parallel.ForEachAsync(missingCovers, new ParallelOptions { MaxDegreeOfParallelism = 12 }, async (game, ct) =>
         {
             try { await LoadSingleCoverOnlineAsync(game); }
