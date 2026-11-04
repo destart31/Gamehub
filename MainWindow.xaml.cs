@@ -3442,16 +3442,27 @@ public partial class MainWindow : Window
             MessageBox.Show("Não consegui usar essa imagem como fundo.");
             return;
         }
-        if (_selectedPlatform == "Início" && ReferenceEquals(_homeGame, _currentDetailGame))
-            _ = ApplyHomeBackgroundAsync(_currentDetailGame);
+        RefreshBackgroundsOf(_currentDetailGame);
     }
 
     private void RemoveBackgroundButton_Click(object sender, RoutedEventArgs e)
     {
         if (_currentDetailGame == null) return;
         BackgroundService.RemoveManual(_currentDetailGame);
-        if (_selectedPlatform == "Início" && ReferenceEquals(_homeGame, _currentDetailGame))
-            _ = ApplyHomeBackgroundAsync(_currentDetailGame);
+        RefreshBackgroundsOf(_currentDetailGame);
+    }
+
+    /// <summary>
+    /// Depois de trocar ou remover o fundo: recarrega a faixa do painel de detalhes (que fica aberto)
+    /// e o fundo da tela, se esse jogo é o que está em foco (Início ou listas).
+    /// </summary>
+    private void RefreshBackgroundsOf(GameEntry game)
+    {
+        if (_detailOpen && _currentDetailGame != null && _currentDetailGame.UserKey == game.UserKey)
+            _ = LoadDetailHeroAsync(game);
+
+        if (_homeGame != null && _homeGame.UserKey == game.UserKey)
+            _ = ApplyHomeBackgroundAsync(_homeGame);
     }
 
     private BitmapSource? _homeBgBmp;

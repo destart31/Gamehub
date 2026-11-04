@@ -271,10 +271,15 @@ public static class BackgroundService
 
             using var resp = await Http.GetAsync(url);
             resp.EnsureSuccessStatusCode();
-            var tmp = target + ".tmp";
-            await using (var fs = File.Create(tmp))
-                await resp.Content.CopyToAsync(fs);
-            File.Move(tmp, target, overwrite: true);
+            // nome único: duas buscas do mesmo jogo ao mesmo tempo não brigam pelo mesmo arquivo temporário
+            var tmp = target + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                await using (var fs = File.Create(tmp))
+                    await resp.Content.CopyToAsync(fs);
+                File.Move(tmp, target, overwrite: true);
+            }
+            finally { try { if (File.Exists(tmp)) File.Delete(tmp); } catch { } }
             return target;
         }
         catch (Exception ex)
@@ -485,7 +490,9 @@ public static class BackgroundService
             var bmp = new BitmapImage();
             bmp.BeginInit();
             bmp.CacheOption = BitmapCacheOption.OnLoad;
-            bmp.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+            // IgnoreImageCache: o WPF guarda a imagem decodificada pelo caminho do arquivo; como o fundo manual
+            // sempre usa o mesmo nome, sem isso a imagem antiga voltava até fechar o programa.
+            bmp.CreateOptions = BitmapCreateOptions.IgnoreColorProfile | BitmapCreateOptions.IgnoreImageCache;
             bmp.UriSource = new Uri(path);
             bmp.EndInit();
             bmp.Freeze();
