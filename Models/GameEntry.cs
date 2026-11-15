@@ -193,18 +193,29 @@ public class GameEntry : INotifyPropertyChanged
         }
     }
 
+    /// <summary>Minutos que vieram da medição do GameHub (jogos de loja sem tempo da loja). Não vai para o cache.</summary>
+    public int MeasuredMinutes { get; set; }
+
+    /// <summary>True quando existe tempo jogado em alguma plataforma (loja, Galaxy ou medido pelo GameHub).</summary>
+    public bool HasPlaytime => PlaytimeMinutes > 0 || PlaytimeByPlatform.Values.Any(v => v > 0);
+
+    /// <summary>
+    /// Última sessão: a data mais recente entre as lojas e o registro do próprio GameHub.
+    /// Com horas jogadas mas sem data, mostra "Sem registro" - "Nunca jogado" só vale quando não há nem horas.
+    /// </summary>
     public string LastPlayedFormatted
     {
         get
         {
-            if (!LastPlayed.HasValue) return "Nunca jogado";
-            var diff = DateTime.Now - LastPlayed.Value;
+            var last = SortLastPlayed;
+            if (!last.HasValue) return HasPlaytime ? "Sem registro" : "Nunca jogado";
+            var diff = DateTime.Now - last.Value;
             if (diff.TotalDays < 1) return "Hoje";
             if (diff.TotalDays < 2) return "Ontem";
             if (diff.TotalDays < 7) return $"Há {(int)diff.TotalDays} dias";
             if (diff.TotalDays < 30) return $"Há {(int)(diff.TotalDays / 7)} semana(s)";
             if (diff.TotalDays < 365) return $"Há {(int)(diff.TotalDays / 30)} mês(es)";
-            return LastPlayed.Value.ToString("dd/MM/yyyy");
+            return last.Value.ToString("dd/MM/yyyy");
         }
     }
 
