@@ -8,12 +8,13 @@ using GameHub.Models;
 namespace GameHub.Services;
 
 /// <summary>
-/// Mede o tempo jogado dos jogos de emulador e dos jogos custom/modificados abertos pelo GameHub.
-/// Esses jogos não têm launcher que guarde o tempo, então o GameHub observa o jogo rodando: depois de
+/// Mede o tempo jogado dos jogos abertos pelo GameHub: o GameHub observa o jogo rodando - depois de
 /// abrir, acompanha os processos que rodam da pasta do jogo e soma o tempo até todos fecharem.
 ///
-/// Jogos de loja ficam de fora de propósito (cada loja tem o seu valor). Dados em %AppData%\GameHub\play_sessions.json;
-/// diagnóstico em %AppData%\GameHub\playtime_log.txt.
+/// Emuladores e jogos custom/modificados usam sempre o tempo medido aqui (não têm launcher que o guarde).
+/// Jogos de loja: o tempo da loja/Galaxy tem prioridade e o medido só entra quando a loja não informa nada
+/// (nunca se soma os dois). A data da última sessão medida vale para todos, quando é mais recente.
+/// Dados em %AppData%\GameHub\play_sessions.json; diagnóstico em %AppData%\GameHub\playtime_log.txt.
 /// </summary>
 public static class PlaySessionService
 {
@@ -37,8 +38,8 @@ public static class PlaySessionService
     private static readonly TimeSpan WaitForStart = TimeSpan.FromMinutes(4);  // atualização/launcher antes do jogo abrir
     private static readonly TimeSpan EndGrace = TimeSpan.FromSeconds(45);     // jogos que reabrem por um launcher próprio
 
-    /// <summary>Só jogos de emulador (rom|...) e custom/modificados (custom|...) têm o tempo medido pelo GameHub.</summary>
-    private static bool IsMeasured(string userKey) =>
+    /// <summary>Emulador (rom|...) e custom/modificado (custom|...): o tempo medido aqui é o único e sempre vale.</summary>
+    private static bool IsOnlyMeasured(string userKey) =>
         userKey.StartsWith("rom|", StringComparison.OrdinalIgnoreCase) ||
         userKey.StartsWith("custom|", StringComparison.OrdinalIgnoreCase);
 
@@ -47,8 +48,6 @@ public static class PlaySessionService
     /// <summary>Começa a acompanhar o jogo recém aberto. <paramref name="onChanged"/> roda quando a sessão termina.</summary>
     public static void Start(GameEntry game, Action? onChanged = null)
     {
-        if (!IsMeasured(game.UserKey)) return; // lojas informam o próprio tempo; aqui só emuladores e jogos custom
-
         var roots = GetRoots(game, out var exe);
         if (roots.Count == 0 && exe == null) return; // não há como saber onde o jogo roda
 
@@ -145,17 +144,27 @@ public static class PlaySessionService
         {
             foreach (var game in list)
             {
-                if (!IsMeasured(game.UserKey) || !Data.TryGetValue(game.UserKey, out var e)) continue;
+                if (!Data.TryGetValue(game.UserKey, out var e)) continue;
 
                 int minutes = e.Seconds > 0 ? (int)((e.Seconds + 59) / 60) : 0;
 
-                // Vale o maior entre o que a loja/Galaxy já informava e o medido aqui (evita contar duas vezes
-                // o mesmo jogo quando o Galaxy também o viu rodando)
                 if (minutes > 0)
                 {
                     int current = game.PlaytimeByPlatform.TryGetValue(e.Platform, out var c) ? c : 0;
-                    if (minutes > current) game.PlaytimeByPlatform[e.Platform] = minutes;
-                    if (minutes > game.PlaytimeMinutes) game.PlaytimeMinutes = minutes;
+                    if (IsOnlyMeasured(game.UserKey))
+                    {
+                        // Emulador/modificado: vale o maior entre o que já havia e o medido aqui
+                        if (minutes > current) game.PlaytimeByPlatform[e.Platform] = minutes;
+                        if (minutes > game.PlaytimeMinutes) game.PlaytimeMinutes = minutes;
+                    }
+                    else if (!game.HasPlaytime || (game.MeasuredMinutes > 0 && current == game.MeasuredMinutes))
+                    {
+                        // Jogo de loja: só usa o tempo medido quando a loja/Galaxy não informa nenhum (nunca soma).
+                        // MeasuredMinutes permite atualizar o valor medido quando a sessão cresce.
+                        game.PlaytimeByPlatform[e.Platform] = minutes;
+                        game.PlaytimeMinutes = minutes;
+                        game.MeasuredMinutes = minutes;
+                    }
                 }
 
                 var currentLast = game.LastPlayedByPlatform.TryGetValue(e.Platform, out var d) ? d : DateTime.MinValue;

@@ -3270,11 +3270,12 @@ public partial class MainWindow : Window
             parts.Add($"{game.PlaytimeMinutes / 60}h {game.PlaytimeMinutes % 60}m jogadas");
 
            var last = game.LastPlayedFormatted;
-           if (!string.IsNullOrWhiteSpace(last) && last != "\u2014")
+           if (!string.IsNullOrWhiteSpace(last) && last != "\u2014" && last != "Sem registro")
                parts.Add(last.StartsWith("Nunca", StringComparison.OrdinalIgnoreCase) ? last : $"Última sessão: {last}");
 
         if (!game.IsInstalled) parts.Insert(0, "Não instalado");
-        return parts.Count == 0 ? "Nunca jogado" : string.Join("  \u00B7  ", parts);
+        if (parts.Count == 0) return game.HasPlaytime ? "Sem última sessão registrada" : "Nunca jogado";
+        return string.Join("  \u00B7  ", parts);
     }
 
     private void ClearHomeMouseFocus()
